@@ -4,3 +4,8 @@
 exposed onHTTPGet Function getSummary($detailLevel : Text) : Object
 	var $res : Object:=New object
 	return $res
+
+// @openapi.hidden
+// Internal helper function that must remain hidden from generated OpenAPI
+exposed Function internalHiddenHelper() : Text
+	return "secret"

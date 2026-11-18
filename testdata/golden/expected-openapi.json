@@ -48,6 +48,13 @@
               "null"
             ]
           },
+          "logo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "binary"
+          },
           "name": {
             "type": "string"
           },
@@ -163,6 +170,25 @@
           }
         }
       }
+    },
+    "securitySchemes": {
+      "4DSessionCookie": {
+        "type": "apiKey",
+        "description": "4D Web / REST session cookie",
+        "name": "WASID",
+        "in": "cookie"
+      },
+      "4DSessionHeader": {
+        "type": "apiKey",
+        "description": "4D Web / REST session header",
+        "name": "WASID",
+        "in": "header"
+      },
+      "BasicAuth": {
+        "type": "http",
+        "description": "HTTP Basic Authentication for 4D REST",
+        "scheme": "basic"
+      }
     }
   },
   "info": {
@@ -200,6 +226,73 @@
         "responses": {
           "200": {
             "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/rest/$catalog": {
+      "summary": "DataStore catalog discovery",
+      "get": {
+        "operationId": "getCatalog",
+        "summary": "Retrieve DataStore catalog metadata",
+        "description": "Returns complete discovery metadata of all exposed DataClasses, attributes, types, and methods in 4D.",
+        "tags": [
+          "DataStore"
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog metadata definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/$catalog/Company": {
+      "summary": "Company catalog schema discovery",
+      "get": {
+        "operationId": "getCompanyCatalog",
+        "summary": "Retrieve catalog schema for Company",
+        "tags": [
+          "Company"
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog definition for Company",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/$catalog/Employee": {
+      "summary": "Employee catalog schema discovery",
+      "get": {
+        "operationId": "getEmployeeCatalog",
+        "summary": "Retrieve catalog schema for Employee",
+        "tags": [
+          "Employee"
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog definition for Employee",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
@@ -575,6 +668,171 @@
         }
       }
     },
+    "/rest/Company({key})/logo": {
+      "summary": "Stream Company.logo binary content",
+      "get": {
+        "operationId": "stream_Company_logo",
+        "summary": "Download binary attribute logo",
+        "tags": [
+          "Company"
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary data stream",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "description": "Primary key identifier of entity",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/rest/Company/$entityset/{entitySetId}": {
+      "summary": "Company entity set operations",
+      "get": {
+        "operationId": "getCompanyEntitySet",
+        "summary": "Query Company entity set",
+        "tags": [
+          "Company"
+        ],
+        "parameters": [
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of entities to return (pagination limit)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$skip",
+            "in": "query",
+            "description": "Number of entities to skip from the beginning (pagination offset)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "description": "ORDA filter expression, e.g. 'name = :1 and age \u003e :2'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$params",
+            "in": "query",
+            "description": "JSON array of parameter values for filter placeholders",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "description": "Sorting expression, e.g. 'name desc, ID asc'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$attributes",
+            "in": "query",
+            "description": "Attributes to return, e.g. 'ID,name,company.name'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$method",
+            "in": "query",
+            "description": "Result format or entity set method, e.g. 'entityset'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$compute",
+            "in": "query",
+            "description": "Compute aggregate expression, e.g. 'salary:sum'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$entityset",
+            "in": "query",
+            "description": "Entity set identifier to reuse an existing query result",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching entities in entity set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanySelection"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "releaseCompanyEntitySet",
+        "summary": "Release Company entity set",
+        "tags": [
+          "Company"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity set released",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "entitySetId",
+          "in": "path",
+          "description": "Identifier of the saved entity set",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
     "/rest/Company/exportReport": {
       "summary": "Class function Company.exportReport",
       "post": {
@@ -904,8 +1162,147 @@
           }
         }
       ]
+    },
+    "/rest/Employee/$entityset/{entitySetId}": {
+      "summary": "Employee entity set operations",
+      "get": {
+        "operationId": "getEmployeeEntitySet",
+        "summary": "Query Employee entity set",
+        "tags": [
+          "Employee"
+        ],
+        "parameters": [
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of entities to return (pagination limit)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$skip",
+            "in": "query",
+            "description": "Number of entities to skip from the beginning (pagination offset)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "description": "ORDA filter expression, e.g. 'name = :1 and age \u003e :2'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$params",
+            "in": "query",
+            "description": "JSON array of parameter values for filter placeholders",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "description": "Sorting expression, e.g. 'name desc, ID asc'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$attributes",
+            "in": "query",
+            "description": "Attributes to return, e.g. 'ID,name,company.name'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$method",
+            "in": "query",
+            "description": "Result format or entity set method, e.g. 'entityset'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$compute",
+            "in": "query",
+            "description": "Compute aggregate expression, e.g. 'salary:sum'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$entityset",
+            "in": "query",
+            "description": "Entity set identifier to reuse an existing query result",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching entities in entity set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeSelection"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "releaseEmployeeEntitySet",
+        "summary": "Release Employee entity set",
+        "tags": [
+          "Employee"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity set released",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "entitySetId",
+          "in": "path",
+          "description": "Identifier of the saved entity set",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
     }
   },
+  "security": [
+    {
+      "4DSessionCookie": []
+    },
+    {
+      "BasicAuth": []
+    }
+  ],
   "servers": [
     {
       "url": "http://127.0.0.1:8044",

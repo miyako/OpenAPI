@@ -50,6 +50,51 @@ func MapIRToOpenAPI(inputIR *ir.IR, cfg *config.Config, col *diagnostics.Collect
 		})
 	}
 
+	// Security Schemes for 4D REST
+	spec.Components.SecuritySchemes["4DSessionCookie"] = &openapi.SecurityScheme{
+		Type:        "apiKey",
+		In:          "cookie",
+		Name:        "WASID",
+		Description: "4D Web / REST session cookie",
+	}
+	spec.Components.SecuritySchemes["4DSessionHeader"] = &openapi.SecurityScheme{
+		Type:        "apiKey",
+		In:          "header",
+		Name:        "WASID",
+		Description: "4D Web / REST session header",
+	}
+	spec.Components.SecuritySchemes["BasicAuth"] = &openapi.SecurityScheme{
+		Type:        "http",
+		Scheme:      "basic",
+		Description: "HTTP Basic Authentication for 4D REST",
+	}
+
+	spec.Security = append(spec.Security,
+		map[string][]string{"4DSessionCookie": {}},
+		map[string][]string{"BasicAuth": {}},
+	)
+
+	// Global Catalog Discovery (Surface A - DataStore)
+	spec.Paths["/rest/$catalog"] = openapi.PathItem{
+		Summary: "DataStore catalog discovery",
+		Get: &openapi.Operation{
+			OperationID: "getCatalog",
+			Summary:     "Retrieve DataStore catalog metadata",
+			Description: "Returns complete discovery metadata of all exposed DataClasses, attributes, types, and methods in 4D.",
+			Tags:        []string{"DataStore"},
+			Responses: map[string]openapi.Response{
+				"200": {
+					Description: "Catalog metadata definition",
+					Content: map[string]openapi.MediaType{
+						"application/json": {
+							Schema: &openapi.Schema{Type: "object"},
+						},
+					},
+				},
+			},
+		},
+	}
+
 	// 1. Map DataClasses (Surface A)
 	for _, dc := range inputIR.DataClasses {
 		if !dc.Exposed {
@@ -320,6 +365,120 @@ func mapDataClassToSpec(spec *openapi.OpenAPISpec, dc ir.DataClass) {
 				"404": {Description: "Entity not found"},
 			},
 		},
+	}
+
+	// DataClass Catalog Endpoint: /rest/$catalog/{DataClass}
+	spec.Paths[fmt.Sprintf("/rest/$catalog/%s", dc.Name)] = openapi.PathItem{
+		Summary: fmt.Sprintf("%s catalog schema discovery", dc.Name),
+		Get: &openapi.Operation{
+			OperationID: fmt.Sprintf("get%sCatalog", dc.Name),
+			Summary:     fmt.Sprintf("Retrieve catalog schema for %s", dc.Name),
+			Tags:        []string{tag},
+			Responses: map[string]openapi.Response{
+				"200": {
+					Description: fmt.Sprintf("Catalog definition for %s", dc.Name),
+					Content: map[string]openapi.MediaType{
+						"application/json": {
+							Schema: &openapi.Schema{Type: "object"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Entity Set Endpoint: /rest/{DataClass}/$entityset/{entitySetId}
+	entitySetPath := fmt.Sprintf("/rest/%s/$entityset/{entitySetId}", dc.Name)
+	spec.Paths[entitySetPath] = openapi.PathItem{
+		Summary: fmt.Sprintf("%s entity set operations", dc.Name),
+		Parameters: []openapi.Parameter{
+			{
+				Name:        "entitySetId",
+				In:          "path",
+				Required:    true,
+				Description: "Identifier of the saved entity set",
+				Schema:      &openapi.Schema{Type: "string"},
+			},
+		},
+		Get: &openapi.Operation{
+			OperationID: fmt.Sprintf("get%sEntitySet", dc.Name),
+			Summary:     fmt.Sprintf("Query %s entity set", dc.Name),
+			Tags:        []string{tag},
+			Parameters:  buildORDAParameters(),
+			Responses: map[string]openapi.Response{
+				"200": {
+					Description: "Matching entities in entity set",
+					Content: map[string]openapi.MediaType{
+						"application/json": {
+							Schema: &openapi.Schema{
+								Ref: fmt.Sprintf("#/components/schemas/%sSelection", dc.Name),
+							},
+						},
+					},
+				},
+			},
+		},
+		Delete: &openapi.Operation{
+			OperationID: fmt.Sprintf("release%sEntitySet", dc.Name),
+			Summary:     fmt.Sprintf("Release %s entity set", dc.Name),
+			Tags:        []string{tag},
+			Responses: map[string]openapi.Response{
+				"200": {
+					Description: "Entity set released",
+					Content: map[string]openapi.MediaType{
+						"application/json": {
+							Schema: &openapi.Schema{
+								Type: "object",
+								Properties: map[string]*openapi.Schema{
+									"ok": {Type: "boolean"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Binary / Picture streaming endpoints: /rest/{DataClass}({key})/{attribute}
+	for _, attr := range dc.Attributes {
+		if attr.FourDType == "blob" || attr.FourDType == "picture" {
+			attrStreamPath := fmt.Sprintf("/rest/%s({key})/%s", dc.Name, attr.Name)
+			mediaType := "application/octet-stream"
+			if attr.FourDType == "picture" {
+				mediaType = "image/*"
+			}
+			spec.Paths[attrStreamPath] = openapi.PathItem{
+				Summary: fmt.Sprintf("Stream %s.%s binary content", dc.Name, attr.Name),
+				Parameters: []openapi.Parameter{
+					{
+						Name:        "key",
+						In:          "path",
+						Required:    true,
+						Description: "Primary key identifier of entity",
+						Schema:      &openapi.Schema{Type: "string"},
+					},
+				},
+				Get: &openapi.Operation{
+					OperationID: fmt.Sprintf("stream_%s_%s", dc.Name, attr.Name),
+					Summary:     fmt.Sprintf("Download binary attribute %s", attr.Name),
+					Tags:        []string{tag},
+					Responses: map[string]openapi.Response{
+						"200": {
+							Description: "Binary data stream",
+							Content: map[string]openapi.MediaType{
+								mediaType: {
+									Schema: &openapi.Schema{
+										Type:   "string",
+										Format: "binary",
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+		}
 	}
 }
 

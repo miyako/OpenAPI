@@ -34,6 +34,14 @@ For each exposed DataClass (defined in `catalog.4DCatalog` with `exposed="true"`
   - Updates existing entity.
 - **`DELETE /rest/{DataClass}({key})`**:
   - Deletes entity. Returns `{ "ok": true }`.
+- **`GET /rest/{DataClass}({key})/{binaryAttribute}`**:
+  - Streams binary Blob or Picture content directly (`image/*` or `application/octet-stream`).
+
+### Catalog & Entity Set Endpoints
+- **`GET /rest/$catalog`**: Discovers all exposed DataClasses, attributes, types, and methods in DataStore.
+- **`GET /rest/$catalog/{DataClass}`**: Discovers metadata definition for a specific DataClass.
+- **`GET /rest/{DataClass}/$entityset/{entitySetId}`**: Queries entities in a saved entity set.
+- **`DELETE /rest/{DataClass}/$entityset/{entitySetId}`**: Releases a saved entity set.
 
 ## 2. Exposed Class Functions (Surface B)
 

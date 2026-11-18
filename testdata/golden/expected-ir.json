@@ -93,6 +93,18 @@
           }
         },
         {
+          "name": "logo",
+          "type": "string",
+          "format": "binary",
+          "fourDType": "picture",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
           "name": "employees",
           "type": "array",
           "fourDType": "collection",

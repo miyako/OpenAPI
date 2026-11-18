@@ -48,8 +48,8 @@ func TestParseCatalog(t *testing.T) {
 		dcMap[dc.Name] = len(dc.Attributes)
 	}
 
-	if dcMap["Company"] != 7 {
-		t.Errorf("Expected 7 attributes for Company (including relations), got %d", dcMap["Company"])
+	if dcMap["Company"] != 8 {
+		t.Errorf("Expected 8 attributes for Company (including logo and relations), got %d", dcMap["Company"])
 	}
 	if dcMap["Employee"] != 6 {
 		t.Errorf("Expected 6 attributes for Employee (including relations), got %d", dcMap["Employee"])

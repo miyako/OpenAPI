@@ -39,6 +39,7 @@ Extracts 4D project metadata and generates OpenAPI 3.1 specification.
 - `--emit-manifest`: Emit metadata manifest JSON
 - `--strict`: Strict mode: fail if any element is unverified or inferred
 - `--stdout`: Write specification directly to stdout
+- `--watch`: Watch project files and automatically regenerate on change
 - `--timeout <seconds>`: Timeout in seconds for tool4d execution (default: 30)
 
 ### `serve`

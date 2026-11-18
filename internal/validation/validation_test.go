@@ -43,3 +43,30 @@ func TestValidateOpenAPI(t *testing.T) {
 		t.Errorf("Expected error for non-3.1 openapi version")
 	}
 }
+
+func TestDanglingRefDetection(t *testing.T) {
+	col := diagnostics.NewCollector()
+	spec := openapi.NewSpec("Test", "1.0.0", "Desc")
+	spec.Paths["/test"] = openapi.PathItem{
+		Get: &openapi.Operation{
+			OperationID: "test_get",
+			Responses: map[string]openapi.Response{
+				"200": {
+					Description: "OK",
+					Content: map[string]openapi.MediaType{
+						"application/json": {
+							Schema: &openapi.Schema{
+								Ref: "#/components/schemas/NonExistent",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_ = ValidateOpenAPI(spec, col)
+	if !col.HasErrors() {
+		t.Errorf("Expected dangling ref error to be recorded in diagnostics")
+	}
+}

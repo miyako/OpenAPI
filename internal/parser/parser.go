@@ -103,7 +103,11 @@ func ParseClassFile(filePath string, col *diagnostics.Collector) ([]ir.Function,
 					retType := parseReturnType(rawReturn)
 
 					// Parse doc annotations
-					summary, description, tag, paramDocs, deprecated := parseAnnotations(commentBlock)
+					summary, description, tag, paramDocs, deprecated, hidden := parseAnnotations(commentBlock)
+					if hidden {
+						commentBlock = nil
+						continue
+					}
 					for i := range params {
 						if doc, ok := paramDocs[params[i].Name]; ok {
 							params[i].Description = doc
@@ -240,7 +244,7 @@ func map4DTypeToOpenAPI(raw string) string {
 }
 
 // parseAnnotations parses // @openapi.* comments
-func parseAnnotations(comments []string) (summary, description, tag string, paramDocs map[string]string, deprecated bool) {
+func parseAnnotations(comments []string) (summary, description, tag string, paramDocs map[string]string, deprecated, hidden bool) {
 	paramDocs = make(map[string]string)
 	var descLines []string
 
@@ -254,6 +258,8 @@ func parseAnnotations(comments []string) (summary, description, tag string, para
 			tag = strings.TrimSpace(strings.TrimPrefix(line, "@openapi.tag"))
 		} else if strings.HasPrefix(line, "@openapi.deprecated") {
 			deprecated = true
+		} else if strings.HasPrefix(line, "@openapi.hidden") || strings.HasPrefix(line, "@openapi.ignore") {
+			hidden = true
 		} else if strings.HasPrefix(line, "@openapi.param") {
 			rem := strings.TrimSpace(strings.TrimPrefix(line, "@openapi.param"))
 			parts := strings.SplitN(rem, " ", 2)

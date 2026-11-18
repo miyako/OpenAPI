@@ -78,8 +78,52 @@ func ValidateOpenAPI(spec *openapi.OpenAPISpec, col *diagnostics.Collector) erro
 				col.AddError("ERR_OPENAPI_RESPONSES", fmt.Sprintf("Operation '%s' on %s must have at least one response", op.OperationID, path), path, 0)
 				return fmt.Errorf("missing responses for operation %s", op.OperationID)
 			}
+
+			// Check requestBody refs
+			if op.RequestBody != nil {
+				for _, mt := range op.RequestBody.Content {
+					checkSchemaRefs(mt.Schema, path, spec.Components.Schemas, col)
+				}
+			}
+
+			// Check response refs
+			for _, resp := range op.Responses {
+				for _, mt := range resp.Content {
+					checkSchemaRefs(mt.Schema, path, spec.Components.Schemas, col)
+				}
+			}
 		}
 	}
 
+	// Validate component schema refs
+	for schName, sch := range spec.Components.Schemas {
+		checkSchemaRefs(sch, "#/components/schemas/"+schName, spec.Components.Schemas, col)
+	}
+
 	return nil
+}
+
+func checkSchemaRefs(sch *openapi.Schema, location string, schemas map[string]*openapi.Schema, col *diagnostics.Collector) {
+	if sch == nil {
+		return
+	}
+
+	if sch.Ref != "" {
+		const prefix = "#/components/schemas/"
+		if strings.HasPrefix(sch.Ref, prefix) {
+			refName := strings.TrimPrefix(sch.Ref, prefix)
+			if _, exists := schemas[refName]; !exists {
+				col.AddError("ERR_OPENAPI_DANGLING_REF", fmt.Sprintf("Schema reference '%s' at %s points to non-existent schema", sch.Ref, location), location, 0)
+			}
+		}
+		return
+	}
+
+	for _, prop := range sch.Properties {
+		checkSchemaRefs(prop, location, schemas, col)
+	}
+
+	if sch.Items != nil {
+		checkSchemaRefs(sch.Items, location, schemas, col)
+	}
 }

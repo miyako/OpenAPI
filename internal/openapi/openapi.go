@@ -12,6 +12,7 @@ type OpenAPISpec struct {
 	OpenAPI    string                 `json:"openapi"`
 	Info       Info                   `json:"info"`
 	Servers    []Server               `json:"servers,omitempty"`
+	Security   []map[string][]string  `json:"security,omitempty"`
 	Paths      map[string]PathItem    `json:"paths"`
 	Components Components             `json:"components"`
 	Tags       []Tag                  `json:"tags,omitempty"`
@@ -107,9 +108,18 @@ type Schema struct {
 	Extensions  map[string]interface{} `json:"-"`
 }
 
+type SecurityScheme struct {
+	Type         string `json:"type"` // "apiKey", "http", "oauth2", "openIdConnect"
+	Description  string `json:"description,omitempty"`
+	Name         string `json:"name,omitempty"` // for apiKey
+	In           string `json:"in,omitempty"`   // "header", "query", "cookie"
+	Scheme       string `json:"scheme,omitempty"` // for http
+	BearerFormat string `json:"bearerFormat,omitempty"`
+}
+
 type Components struct {
-	Schemas       map[string]*Schema `json:"schemas"`
-	SecuritySchemes map[string]interface{} `json:"securitySchemes,omitempty"`
+	Schemas         map[string]*Schema         `json:"schemas"`
+	SecuritySchemes map[string]*SecurityScheme `json:"securitySchemes,omitempty"`
 }
 
 // NewSpec initializes an empty OpenAPI 3.1.0 specification.
@@ -122,9 +132,11 @@ func NewSpec(title, version, description string) *OpenAPISpec {
 			Description: description,
 		},
 		Servers:    make([]Server, 0),
+		Security:   make([]map[string][]string, 0),
 		Paths:      make(map[string]PathItem),
 		Components: Components{
-			Schemas: make(map[string]*Schema),
+			Schemas:         make(map[string]*Schema),
+			SecuritySchemes: make(map[string]*SecurityScheme),
 		},
 		Tags:       make([]Tag, 0),
 		Extensions: make(map[string]interface{}),
@@ -198,6 +210,28 @@ func (s *OpenAPISpec) ToYAML() ([]byte, error) {
 		writeOpYAML(&sb, "patch", item.Patch, 4)
 	}
 
+	if len(s.Security) > 0 {
+		sb.WriteString("security:\n")
+		for _, sec := range s.Security {
+			secReqKeys := make([]string, 0, len(sec))
+			for sk := range sec {
+				secReqKeys = append(secReqKeys, sk)
+			}
+			sort.Strings(secReqKeys)
+			for _, sk := range secReqKeys {
+				scopes := sec[sk]
+				if len(scopes) == 0 {
+					sb.WriteString(fmt.Sprintf("  - %s: []\n", sk))
+				} else {
+					sb.WriteString(fmt.Sprintf("  - %s:\n", sk))
+					for _, sc := range scopes {
+						sb.WriteString(fmt.Sprintf("      - %s\n", sc))
+					}
+				}
+			}
+		}
+	}
+
 	// Components
 	sb.WriteString("components:\n")
 	sb.WriteString("  schemas:\n")
@@ -213,6 +247,35 @@ func (s *OpenAPISpec) ToYAML() ([]byte, error) {
 		writeSchemaYAML(&sb, sch, 6)
 	}
 
+	if len(s.Components.SecuritySchemes) > 0 {
+		sb.WriteString("  securitySchemes:\n")
+		secKeys := make([]string, 0, len(s.Components.SecuritySchemes))
+		for k := range s.Components.SecuritySchemes {
+			secKeys = append(secKeys, k)
+		}
+		sort.Strings(secKeys)
+		for _, k := range secKeys {
+			scheme := s.Components.SecuritySchemes[k]
+			sb.WriteString(fmt.Sprintf("    %s:\n", k))
+			sb.WriteString(fmt.Sprintf("      type: %s\n", scheme.Type))
+			if scheme.Description != "" {
+				sb.WriteString(fmt.Sprintf("      description: %s\n", escapeYAMLString(scheme.Description)))
+			}
+			if scheme.Name != "" {
+				sb.WriteString(fmt.Sprintf("      name: %s\n", scheme.Name))
+			}
+			if scheme.In != "" {
+				sb.WriteString(fmt.Sprintf("      in: %s\n", scheme.In))
+			}
+			if scheme.Scheme != "" {
+				sb.WriteString(fmt.Sprintf("      scheme: %s\n", scheme.Scheme))
+			}
+			if scheme.BearerFormat != "" {
+				sb.WriteString(fmt.Sprintf("      bearerFormat: %s\n", scheme.BearerFormat))
+			}
+		}
+	}
+
 	return []byte(sb.String()), nil
 }
 
@@ -225,6 +288,9 @@ func (s *OpenAPISpec) buildOrderedMap() map[string]interface{} {
 	}
 	if len(s.Tags) > 0 {
 		m["tags"] = s.Tags
+	}
+	if len(s.Security) > 0 {
+		m["security"] = s.Security
 	}
 	m["paths"] = s.Paths
 	m["components"] = s.Components

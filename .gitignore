@@ -1,5 +1,5 @@
-4d-openapi
-4d-openapi.exe
+/4d-openapi
+/4d-openapi.exe
 *.exe
 *.test
 dist/
