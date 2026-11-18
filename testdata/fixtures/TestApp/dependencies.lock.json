@@ -1,0 +1,10 @@
+{
+  "projectId": "TestApp",
+  "dependencies": {
+    "my-auth-component": {
+      "version": "1.0.0",
+      "source": "github",
+      "path": "miyako/4d-auth"
+    }
+  }
+}

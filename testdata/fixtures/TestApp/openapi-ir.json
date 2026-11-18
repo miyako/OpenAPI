@@ -1,0 +1,344 @@
+{
+  "irVersion": 1,
+  "project": {
+    "name": "TestApp",
+    "path": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/TestApp.4DProject",
+    "fourDVersion": "21",
+    "tool4dVerified": false
+  },
+  "components": [
+    {
+      "name": "my-auth-component",
+      "version": "1.0.0",
+      "source": "github",
+      "path": "miyako/4d-auth"
+    }
+  ],
+  "dataclasses": [
+    {
+      "name": "Company",
+      "exposed": true,
+      "scope": "public",
+      "attributes": [
+        {
+          "name": "ID",
+          "type": "integer",
+          "format": "int64",
+          "fourDType": "integer64",
+          "primaryKey": true,
+          "readOnly": true,
+          "exposed": true,
+          "nullable": false,
+          "autosequence": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "fourDType": "text",
+          "exposed": true,
+          "nullable": false,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "revenue",
+          "type": "number",
+          "format": "double",
+          "fourDType": "real",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "foundedDate",
+          "type": "string",
+          "format": "date",
+          "fourDType": "date",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "isActive",
+          "type": "boolean",
+          "fourDType": "boolean",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "details",
+          "type": "object",
+          "fourDType": "object",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        }
+      ],
+      "queries": {
+        "filterable": true,
+        "sortable": true,
+        "paginated": true
+      },
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+        "confidence": "verified"
+      }
+    },
+    {
+      "name": "Employee",
+      "exposed": true,
+      "scope": "public",
+      "attributes": [
+        {
+          "name": "ID",
+          "type": "integer",
+          "format": "int64",
+          "fourDType": "integer64",
+          "primaryKey": true,
+          "readOnly": true,
+          "exposed": true,
+          "nullable": false,
+          "autosequence": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "companyID",
+          "type": "integer",
+          "format": "int64",
+          "fourDType": "integer64",
+          "exposed": true,
+          "nullable": false,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "firstName",
+          "type": "string",
+          "fourDType": "text",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "lastName",
+          "type": "string",
+          "fourDType": "text",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "fourDType": "text",
+          "exposed": true,
+          "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        }
+      ],
+      "queries": {
+        "filterable": true,
+        "sortable": true,
+        "paginated": true
+      },
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+        "confidence": "verified"
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "getSummary",
+      "target": "dataclass",
+      "className": "Company",
+      "exposed": true,
+      "onHTTPGet": true,
+      "summary": "Get summary of companies",
+      "parameters": [
+        {
+          "name": "detailLevel",
+          "type": "string",
+          "fourDType": "Text",
+          "required": true,
+          "description": "Level of details (summary, full)"
+        }
+      ],
+      "returnType": {
+        "type": "object",
+        "fourDType": "Object"
+      },
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/Classes/Company.4dm",
+        "line": 4,
+        "confidence": "inferred"
+      }
+    },
+    {
+      "name": "calculateTax",
+      "target": "entity",
+      "className": "Company",
+      "exposed": true,
+      "onHTTPGet": false,
+      "summary": "Calculate tax for this specific company",
+      "parameters": [
+        {
+          "name": "year",
+          "type": "integer",
+          "fourDType": "Integer",
+          "required": true,
+          "description": "Fiscal tax year"
+        }
+      ],
+      "returnType": {
+        "type": "number",
+        "fourDType": "Real"
+      },
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/Classes/CompanyEntity.4dm",
+        "line": 4,
+        "confidence": "inferred"
+      }
+    },
+    {
+      "name": "exportReport",
+      "target": "entityselection",
+      "className": "Company",
+      "exposed": true,
+      "onHTTPGet": false,
+      "summary": "Export selected companies to structured report",
+      "returnType": {
+        "type": "object",
+        "fourDType": "Object"
+      },
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/Classes/CompanySelection.4dm",
+        "line": 3,
+        "confidence": "inferred"
+      }
+    },
+    {
+      "name": "getSystemStatus",
+      "target": "datastore",
+      "className": "DataStore",
+      "exposed": true,
+      "onHTTPGet": true,
+      "summary": "Check system health and database statistics",
+      "tag": "DataStore",
+      "returnType": {
+        "type": "object",
+        "fourDType": "Object"
+      },
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/Classes/DataStore.4dm",
+        "line": 4,
+        "confidence": "inferred"
+      }
+    },
+    {
+      "name": "getGlobalConfig",
+      "target": "singleton",
+      "className": "MySingleton",
+      "exposed": true,
+      "onHTTPGet": true,
+      "summary": "Retrieve global system configuration",
+      "returnType": {
+        "type": "object",
+        "fourDType": "Object"
+      },
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/Classes/MySingleton.4dm",
+        "line": 5,
+        "confidence": "inferred"
+      }
+    }
+  ],
+  "handlers": [
+    {
+      "class": "WebhookHandler",
+      "method": "receive",
+      "pattern": "/api/v1/webhook",
+      "isRegex": false,
+      "verbs": [
+        "POST"
+      ],
+      "summary": "Receive external webhook notifications",
+      "description": "Endpoint for external service webhooks.",
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/HTTPHandlers.json",
+        "confidence": "verified"
+      }
+    },
+    {
+      "class": "UserHandler",
+      "method": "getUser",
+      "pattern": "/api/v1/users/([0-9]+)",
+      "isRegex": true,
+      "verbs": [
+        "GET"
+      ],
+      "summary": "Retrieve user by ID via custom handler",
+      "description": "Handler matching user regex routes.",
+      "provenance": {
+        "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/HTTPHandlers.json",
+        "confidence": "verified"
+      }
+    }
+  ],
+  "privileges": [],
+  "diagnostics": [
+    {
+      "code": "INFO_DEP_REMOTE",
+      "severity": "info",
+      "message": "Remote component my-auth-component declared (miyako/4d-auth@1.0.0)",
+      "source": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/dependencies.json",
+      "confidence": "inferred"
+    },
+    {
+      "code": "WARN_REGEX_HANDLER",
+      "severity": "warning",
+      "message": "Handler 'UserHandler' regex pattern '/api/v1/users/([0-9]+)' preserved in x-4d-regexPattern",
+      "source": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Sources/HTTPHandlers.json",
+      "confidence": "inferred"
+    },
+    {
+      "code": "INFO_TOOL4D_BYPASS",
+      "severity": "info",
+      "message": "tool4d not found or not configured; using high-fidelity static declarations",
+      "confidence": "inferred"
+    }
+  ]
+}

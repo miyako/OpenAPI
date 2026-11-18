@@ -1,0 +1,912 @@
+{
+  "components": {
+    "schemas": {
+      "Company": {
+        "type": "object",
+        "description": "Entity representation of Company",
+        "properties": {
+          "ID": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "__KEY": {
+            "type": "string",
+            "description": "Primary key identifier of entity in 4D",
+            "readOnly": true
+          },
+          "__STAMP": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Revision stamp for optimistic locking",
+            "readOnly": true
+          },
+          "details": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "foundedDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "isActive": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "revenue": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          }
+        },
+        "required": [
+          "ID"
+        ]
+      },
+      "CompanySelection": {
+        "type": "object",
+        "description": "Entity selection collection response for Company",
+        "properties": {
+          "__COUNT": {
+            "type": "integer",
+            "description": "Total count of matching entities"
+          },
+          "__ENTITIES": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Company"
+            }
+          },
+          "__FIRST": {
+            "type": "integer",
+            "description": "First entity index in selection"
+          },
+          "__SENT": {
+            "type": "integer",
+            "description": "Count of entities sent in page"
+          }
+        }
+      },
+      "Employee": {
+        "type": "object",
+        "description": "Entity representation of Employee",
+        "properties": {
+          "ID": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "__KEY": {
+            "type": "string",
+            "description": "Primary key identifier of entity in 4D",
+            "readOnly": true
+          },
+          "__STAMP": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Revision stamp for optimistic locking",
+            "readOnly": true
+          },
+          "companyID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firstName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "ID"
+        ]
+      },
+      "EmployeeSelection": {
+        "type": "object",
+        "description": "Entity selection collection response for Employee",
+        "properties": {
+          "__COUNT": {
+            "type": "integer",
+            "description": "Total count of matching entities"
+          },
+          "__ENTITIES": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Employee"
+            }
+          },
+          "__FIRST": {
+            "type": "integer",
+            "description": "First entity index in selection"
+          },
+          "__SENT": {
+            "type": "integer",
+            "description": "Count of entities sent in page"
+          }
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "TestApp REST API",
+    "version": "1.0.0",
+    "description": "Official OpenAPI 3.1 Specification for TestApp"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/users/{id}": {
+      "summary": "Custom handler route for /api/v1/users/{id}",
+      "get": {
+        "operationId": "UserHandler_getUser_get",
+        "summary": "Retrieve user by ID via custom handler",
+        "description": "Handler matching user regex routes.",
+        "tags": [
+          "UserHandler"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/api/v1/webhook": {
+      "summary": "Custom handler route for /api/v1/webhook",
+      "post": {
+        "operationId": "WebhookHandler_receive_post",
+        "summary": "Receive external webhook notifications",
+        "description": "Endpoint for external service webhooks.",
+        "tags": [
+          "WebhookHandler"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/rest/$catalog/getSystemStatus": {
+      "summary": "Class function DataStore.getSystemStatus",
+      "get": {
+        "operationId": "DataStore_getSystemStatus_get",
+        "summary": "Check system health and database statistics (HTTP GET)",
+        "tags": [
+          "DataStore"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "DataStore_getSystemStatus_post",
+        "summary": "Check system health and database statistics",
+        "tags": [
+          "DataStore"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/$singleton/MySingleton/getGlobalConfig": {
+      "summary": "Class function MySingleton.getGlobalConfig",
+      "get": {
+        "operationId": "MySingleton_getGlobalConfig_get",
+        "summary": "Retrieve global system configuration (HTTP GET)",
+        "tags": [
+          "MySingleton"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "MySingleton_getGlobalConfig_post",
+        "summary": "Retrieve global system configuration",
+        "tags": [
+          "MySingleton"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/Company": {
+      "summary": "Company collection endpoint",
+      "get": {
+        "operationId": "listCompany",
+        "summary": "Retrieve Company entities",
+        "description": "Query and retrieve entity collection for Company with standard ORDA query parameters.",
+        "tags": [
+          "Company"
+        ],
+        "parameters": [
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of entities to return (pagination limit)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$skip",
+            "in": "query",
+            "description": "Number of entities to skip from the beginning (pagination offset)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "description": "ORDA filter expression, e.g. 'name = :1 and age \u003e :2'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$params",
+            "in": "query",
+            "description": "JSON array of parameter values for filter placeholders",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "description": "Sorting expression, e.g. 'name desc, ID asc'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$attributes",
+            "in": "query",
+            "description": "Attributes to return, e.g. 'ID,name,company.name'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$method",
+            "in": "query",
+            "description": "Result format or entity set method, e.g. 'entityset'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$compute",
+            "in": "query",
+            "description": "Compute aggregate expression, e.g. 'salary:sum'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$entityset",
+            "in": "query",
+            "description": "Entity set identifier to reuse an existing query result",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanySelection"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createCompany",
+        "summary": "Create a new Company entity",
+        "tags": [
+          "Company"
+        ],
+        "requestBody": {
+          "description": "Payload for new Company",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Company"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Company"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/Company({key})": {
+      "summary": "Single Company entity endpoint",
+      "get": {
+        "operationId": "getCompany",
+        "summary": "Retrieve single Company by key",
+        "tags": [
+          "Company"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Company"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateCompany",
+        "summary": "Update Company entity",
+        "tags": [
+          "Company"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Company"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Company"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteCompany",
+        "summary": "Delete Company entity",
+        "tags": [
+          "Company"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "description": "Primary key identifier of entity",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/rest/Company({key})/calculateTax": {
+      "summary": "Class function Company.calculateTax",
+      "post": {
+        "operationId": "Company_calculateTax_post",
+        "summary": "Calculate tax for this specific company",
+        "tags": [
+          "Company"
+        ],
+        "requestBody": {
+          "description": "Parameters for calculateTax",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "integer",
+                    "description": "Fiscal tax year"
+                  }
+                },
+                "required": [
+                  "year"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/Company/exportReport": {
+      "summary": "Class function Company.exportReport",
+      "post": {
+        "operationId": "Company_exportReport_post",
+        "summary": "Export selected companies to structured report",
+        "tags": [
+          "Company"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/Company/getSummary": {
+      "summary": "Class function Company.getSummary",
+      "get": {
+        "operationId": "Company_getSummary_get",
+        "summary": "Get summary of companies (HTTP GET)",
+        "tags": [
+          "Company"
+        ],
+        "parameters": [
+          {
+            "name": "$params",
+            "in": "query",
+            "description": "JSON array string of function parameters, e.g. [\"val1\", 2]",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "Company_getSummary_post",
+        "summary": "Get summary of companies",
+        "tags": [
+          "Company"
+        ],
+        "requestBody": {
+          "description": "Parameters for getSummary",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "detailLevel": {
+                    "type": "string",
+                    "description": "Level of details (summary, full)"
+                  }
+                },
+                "required": [
+                  "detailLevel"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful function invocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/Employee": {
+      "summary": "Employee collection endpoint",
+      "get": {
+        "operationId": "listEmployee",
+        "summary": "Retrieve Employee entities",
+        "description": "Query and retrieve entity collection for Employee with standard ORDA query parameters.",
+        "tags": [
+          "Employee"
+        ],
+        "parameters": [
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of entities to return (pagination limit)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$skip",
+            "in": "query",
+            "description": "Number of entities to skip from the beginning (pagination offset)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "description": "ORDA filter expression, e.g. 'name = :1 and age \u003e :2'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$params",
+            "in": "query",
+            "description": "JSON array of parameter values for filter placeholders",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "description": "Sorting expression, e.g. 'name desc, ID asc'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$attributes",
+            "in": "query",
+            "description": "Attributes to return, e.g. 'ID,name,company.name'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$method",
+            "in": "query",
+            "description": "Result format or entity set method, e.g. 'entityset'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$compute",
+            "in": "query",
+            "description": "Compute aggregate expression, e.g. 'salary:sum'",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "$entityset",
+            "in": "query",
+            "description": "Entity set identifier to reuse an existing query result",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeSelection"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createEmployee",
+        "summary": "Create a new Employee entity",
+        "tags": [
+          "Employee"
+        ],
+        "requestBody": {
+          "description": "Payload for new Employee",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Employee"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/Employee({key})": {
+      "summary": "Single Employee entity endpoint",
+      "get": {
+        "operationId": "getEmployee",
+        "summary": "Retrieve single Employee by key",
+        "tags": [
+          "Employee"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Employee"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateEmployee",
+        "summary": "Update Employee entity",
+        "tags": [
+          "Employee"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Employee"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEmployee",
+        "summary": "Delete Employee entity",
+        "tags": [
+          "Employee"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "description": "Primary key identifier of entity",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8044",
+      "description": "Test 4D REST Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Company",
+      "description": "ORDA REST operations for Company DataClass"
+    },
+    {
+      "name": "Employee",
+      "description": "ORDA REST operations for Employee DataClass"
+    }
+  ]
+}

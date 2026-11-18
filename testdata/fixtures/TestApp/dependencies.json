@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "my-auth-component": {
+      "github": "miyako/4d-auth",
+      "version": "1.0.0"
+    }
+  }
+}

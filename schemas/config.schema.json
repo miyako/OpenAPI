@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/miyako/OpenAPI/main/schemas/config.schema.json",
+  "title": "4d-openapi Project Configuration Schema",
+  "type": "object",
+  "properties": {
+    "servers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "tool4d": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "version": { "type": "string" },
+        "timeout": { "type": "string" }
+      }
+    },
+    "include": {
+      "type": "object",
+      "properties": {
+        "dataclasses": { "type": "array", "items": { "type": "string" } },
+        "handlers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "exclude": {
+      "type": "object",
+      "properties": {
+        "dataclasses": { "type": "array", "items": { "type": "string" } },
+        "handlers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "overlay": { "type": "string" },
+    "strict": { "type": "boolean" },
+    "info": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "version": { "type": "string" },
+        "description": { "type": "string" },
+        "termsOfService": { "type": "string" },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "url": { "type": "string" },
+            "email": { "type": "string" }
+          }
+        },
+        "license": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "url": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

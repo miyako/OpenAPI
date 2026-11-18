@@ -1,0 +1,18 @@
+[
+  {
+    "class": "WebhookHandler",
+    "method": "receive",
+    "pattern": "/api/v1/webhook",
+    "verbs": ["POST"],
+    "summary": "Receive external webhook notifications",
+    "description": "Endpoint for external service webhooks."
+  },
+  {
+    "class": "UserHandler",
+    "method": "getUser",
+    "regexPattern": "/api/v1/users/([0-9]+)",
+    "verbs": ["GET"],
+    "summary": "Retrieve user by ID via custom handler",
+    "description": "Handler matching user regex routes."
+  }
+]

@@ -1,0 +1,6 @@
+4d-openapi
+4d-openapi.exe
+*.exe
+*.test
+dist/
+.DS_Store

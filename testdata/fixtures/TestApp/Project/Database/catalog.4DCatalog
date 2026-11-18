@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database version="2.0">
+  <table name="Company" id="1" exposed="true">
+    <field name="ID" id="1" type="4" exposed="true" autosequence="true" not_null="true" read_only="true"/>
+    <field name="name" id="2" type="9" exposed="true" not_null="true"/>
+    <field name="revenue" id="3" type="6" exposed="true"/>
+    <field name="foundedDate" id="4" type="7" exposed="true"/>
+    <field name="isActive" id="5" type="1" exposed="true"/>
+    <field name="details" id="6" type="14" exposed="true"/>
+    <primary_key field="ID"/>
+  </table>
+  <table name="Employee" id="2" exposed="true">
+    <field name="ID" id="1" type="4" exposed="true" autosequence="true" not_null="true" read_only="true"/>
+    <field name="companyID" id="2" type="4" exposed="true" not_null="true"/>
+    <field name="firstName" id="3" type="9" exposed="true"/>
+    <field name="lastName" id="4" type="9" exposed="true"/>
+    <field name="email" id="5" type="9" exposed="true"/>
+    <primary_key field="ID"/>
+  </table>
+</database>

@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/miyako/OpenAPI/main/schemas/ir-v1.schema.json",
+  "title": "4d-openapi Intermediate Representation (IR v1)",
+  "type": "object",
+  "required": [
+    "irVersion",
+    "project",
+    "components",
+    "dataclasses",
+    "functions",
+    "handlers",
+    "privileges",
+    "diagnostics"
+  ],
+  "properties": {
+    "irVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "path", "tool4dVerified"],
+      "properties": {
+        "name": { "type": "string" },
+        "path": { "type": "string" },
+        "fourDVersion": { "type": "string" },
+        "tool4dBuild": { "type": "string" },
+        "tool4dVerified": { "type": "boolean" }
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "source", "path"],
+        "properties": {
+          "name": { "type": "string" },
+          "version": { "type": "string" },
+          "source": { "type": "string" },
+          "path": { "type": "string" }
+        }
+      }
+    },
+    "dataclasses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "exposed", "attributes", "queries", "provenance"],
+        "properties": {
+          "name": { "type": "string" },
+          "exposed": { "type": "boolean" },
+          "scope": { "type": "string" },
+          "description": { "type": "string" },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type", "fourDType", "exposed", "nullable", "provenance"],
+              "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string" },
+                "format": { "type": "string" },
+                "fourDType": { "type": "string" },
+                "primaryKey": { "type": "boolean" },
+                "readOnly": { "type": "boolean" },
+                "exposed": { "type": "boolean" },
+                "nullable": { "type": "boolean" },
+                "autosequence": { "type": "boolean" },
+                "description": { "type": "string" },
+                "provenance": { "$ref": "#/$defs/provenance" }
+              }
+            }
+          },
+          "queries": {
+            "type": "object",
+            "required": ["filterable", "sortable", "paginated"],
+            "properties": {
+              "filterable": { "type": "boolean" },
+              "sortable": { "type": "boolean" },
+              "paginated": { "type": "boolean" }
+            }
+          },
+          "provenance": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "functions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "target", "className", "exposed", "onHTTPGet", "provenance"],
+        "properties": {
+          "name": { "type": "string" },
+          "target": {
+            "type": "string",
+            "enum": ["datastore", "dataclass", "entity", "entityselection", "singleton"]
+          },
+          "className": { "type": "string" },
+          "exposed": { "type": "boolean" },
+          "onHTTPGet": { "type": "boolean" },
+          "summary": { "type": "string" },
+          "description": { "type": "string" },
+          "tag": { "type": "string" },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type", "required"],
+              "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string" },
+                "format": { "type": "string" },
+                "fourDType": { "type": "string" },
+                "required": { "type": "boolean" },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "returnType": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "type": "string" },
+              "format": { "type": "string" },
+              "fourDType": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          },
+          "provenance": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "handlers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["class", "method", "pattern", "isRegex", "verbs", "provenance"],
+        "properties": {
+          "class": { "type": "string" },
+          "method": { "type": "string" },
+          "pattern": { "type": "string" },
+          "isRegex": { "type": "boolean" },
+          "verbs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "summary": { "type": "string" },
+          "description": { "type": "string" },
+          "provenance": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "privileges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "message"],
+        "properties": {
+          "code": { "type": "string" },
+          "severity": { "type": "string", "enum": ["info", "warning", "error"] },
+          "message": { "type": "string" },
+          "source": { "type": "string" },
+          "line": { "type": "integer" },
+          "confidence": { "type": "string", "enum": ["verified", "inferred", "unknown"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "required": ["confidence"],
+      "properties": {
+        "file": { "type": "string" },
+        "line": { "type": "integer" },
+        "component": { "type": "string" },
+        "confidence": {
+          "type": "string",
+          "enum": ["verified", "inferred", "unknown"]
+        }
+      }
+    }
+  }
+}

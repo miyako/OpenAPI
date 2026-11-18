@@ -1,0 +1,6 @@
+{
+  "name": "4d-openapi-extractor",
+  "version": "1.0.0",
+  "entrypoint": "extract_metadata",
+  "description": "Headless runtime introspection bridge for 4d-openapi"
+}
