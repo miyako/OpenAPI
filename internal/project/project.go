@@ -157,8 +157,18 @@ func Discover(targetPath string) (*ProjectInfo, error) {
 
 // XML structures for catalog.4DCatalog
 type XMLCatalog struct {
-	XMLName xml.Name   `xml:"database"`
-	Tables  []XMLTable `xml:"table"`
+	XMLName   xml.Name      `xml:"database"`
+	Tables    []XMLTable    `xml:"table"`
+	Relations []XMLRelation `xml:"relation"`
+}
+
+type XMLRelation struct {
+	Name        string `xml:"name,attr"`
+	SourceTable string `xml:"source_table,attr"`
+	SourceField string `xml:"source_field,attr"`
+	DestTable   string `xml:"destination_table,attr"`
+	DestField   string `xml:"destination_field,attr"`
+	Type        string `xml:"type,attr"`
 }
 
 type XMLTable struct {
@@ -262,6 +272,68 @@ func ParseCatalog(catalogPath string, col *diagnostics.Collector) ([]ir.DataClas
 				Sortable:   true,
 				Paginated:  true,
 			},
+			Provenance: ir.Provenance{
+				File:       catalogPath,
+				Confidence: diagnostics.ConfidenceVerified,
+			},
+		})
+	}
+
+	// Resolve relations between DataClasses
+	tableMap := make(map[string]int) // table ID/name to index in dataclasses
+	for idx, dc := range dataclasses {
+		tableMap[dc.Name] = idx
+		for _, t := range cat.Tables {
+			if t.Name == dc.Name {
+				tableMap[t.ID] = idx
+			}
+		}
+	}
+
+	for _, rel := range cat.Relations {
+		srcIdx, srcOk := tableMap[rel.SourceTable]
+		destIdx, destOk := tableMap[rel.DestTable]
+		if !srcOk || !destOk {
+			continue
+		}
+
+		srcDC := dataclasses[srcIdx].Name
+		destDC := dataclasses[destIdx].Name
+
+		relName := rel.Name
+		if relName == "" {
+			relName = strings.ToLower(destDC) + "s"
+		}
+
+		// Add one-to-many relation attribute to source DataClass
+		dataclasses[srcIdx].Attributes = append(dataclasses[srcIdx].Attributes, ir.Attribute{
+			Name:            relName,
+			Type:            "array",
+			FourDType:       "collection",
+			Exposed:         true,
+			Nullable:        true,
+			ReadOnly:        true,
+			TargetDataClass: destDC,
+			RelationType:    "one-to-many",
+			Description:     fmt.Sprintf("Relation to %s entities", destDC),
+			Provenance: ir.Provenance{
+				File:       catalogPath,
+				Confidence: diagnostics.ConfidenceVerified,
+			},
+		})
+
+		// Add many-to-one reverse relation attribute to destination DataClass
+		reverseName := strings.ToLower(srcDC)
+		dataclasses[destIdx].Attributes = append(dataclasses[destIdx].Attributes, ir.Attribute{
+			Name:            reverseName,
+			Type:            "object",
+			FourDType:       "object",
+			Exposed:         true,
+			Nullable:        true,
+			ReadOnly:        true,
+			TargetDataClass: srcDC,
+			RelationType:    "many-to-one",
+			Description:     fmt.Sprintf("Relation to parent %s entity", srcDC),
 			Provenance: ir.Provenance{
 				File:       catalogPath,
 				Confidence: diagnostics.ConfidenceVerified,

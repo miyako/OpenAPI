@@ -17,4 +17,5 @@
     <field name="email" id="5" type="9" exposed="true"/>
     <primary_key field="ID"/>
   </table>
+  <relation name="employees" source_table="1" source_field="1" destination_table="2" destination_field="2" type="1"/>
 </database>

@@ -67,6 +67,8 @@
                 "exposed": { "type": "boolean" },
                 "nullable": { "type": "boolean" },
                 "autosequence": { "type": "boolean" },
+                "targetDataClass": { "type": "string" },
+                "relationType": { "type": "string" },
                 "description": { "type": "string" },
                 "provenance": { "$ref": "#/$defs/provenance" }
               }

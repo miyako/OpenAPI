@@ -129,16 +129,36 @@ func mapDataClassToSpec(spec *openapi.OpenAPISpec, dc ir.DataClass) {
 			continue
 		}
 
-		var propType interface{} = attr.Type
-		if attr.Nullable {
-			propType = []string{attr.Type, "null"}
-		}
+		var propSchema *openapi.Schema
+		if attr.TargetDataClass != "" {
+			if attr.RelationType == "one-to-many" {
+				propSchema = &openapi.Schema{
+					Type:        "array",
+					Description: attr.Description,
+					ReadOnly:    true,
+					Items: &openapi.Schema{
+						Ref: fmt.Sprintf("#/components/schemas/%s", attr.TargetDataClass),
+					},
+				}
+			} else {
+				propSchema = &openapi.Schema{
+					Description: attr.Description,
+					ReadOnly:    true,
+					Ref:         fmt.Sprintf("#/components/schemas/%s", attr.TargetDataClass),
+				}
+			}
+		} else {
+			var propType interface{} = attr.Type
+			if attr.Nullable {
+				propType = []string{attr.Type, "null"}
+			}
 
-		propSchema := &openapi.Schema{
-			Type:        propType,
-			Format:      attr.Format,
-			Description: attr.Description,
-			ReadOnly:    attr.ReadOnly,
+			propSchema = &openapi.Schema{
+				Type:        propType,
+				Format:      attr.Format,
+				Description: attr.Description,
+				ReadOnly:    attr.ReadOnly,
+			}
 		}
 
 		entitySchema.Properties[attr.Name] = propSchema

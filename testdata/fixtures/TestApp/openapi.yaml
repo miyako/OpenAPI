@@ -488,6 +488,12 @@ components:
           type:
             - object
             - null
+        employees:
+          type: array
+          description: Relation to Employee entities
+          readOnly: true
+          items:
+            $ref: "#/components/schemas/Employee"
         foundedDate:
           type:
             - string
@@ -540,6 +546,8 @@ components:
           format: int64
           description: Revision stamp for optimistic locking
           readOnly: true
+        company:
+          $ref: "#/components/schemas/Company"
         companyID:
           type: integer
           format: int64

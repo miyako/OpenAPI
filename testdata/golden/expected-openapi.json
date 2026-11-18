@@ -27,6 +27,14 @@
               "null"
             ]
           },
+          "employees": {
+            "type": "array",
+            "description": "Relation to Employee entities",
+            "items": {
+              "$ref": "#/components/schemas/Employee"
+            },
+            "readOnly": true
+          },
           "foundedDate": {
             "type": [
               "string",
@@ -97,6 +105,11 @@
             "type": "integer",
             "format": "int64",
             "description": "Revision stamp for optimistic locking",
+            "readOnly": true
+          },
+          "company": {
+            "description": "Relation to parent Company entity",
+            "$ref": "#/components/schemas/Company",
             "readOnly": true
           },
           "companyID": {

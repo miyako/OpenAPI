@@ -39,12 +39,14 @@ type Attribute struct {
 	Type         string     `json:"type"`     // OpenAPI type: string, integer, number, boolean, object, array
 	Format       string     `json:"format,omitempty"` // int32, int64, float, double, date, date-time
 	FourDType    string     `json:"fourDType"` // alpha, text, integer, longint, integer64, real, date, time, boolean, picture, blob, object, collection
-	PrimaryKey   bool       `json:"primaryKey,omitempty"`
-	ReadOnly     bool       `json:"readOnly,omitempty"`
-	Exposed      bool       `json:"exposed"`
-	Nullable     bool       `json:"nullable"`
-	Autosequence bool       `json:"autosequence,omitempty"`
-	Description  string     `json:"description,omitempty"`
+	PrimaryKey      bool       `json:"primaryKey,omitempty"`
+	ReadOnly        bool       `json:"readOnly,omitempty"`
+	Exposed         bool       `json:"exposed"`
+	Nullable        bool       `json:"nullable"`
+	Autosequence    bool       `json:"autosequence,omitempty"`
+	TargetDataClass string     `json:"targetDataClass,omitempty"`
+	RelationType    string     `json:"relationType,omitempty"`
+	Description     string     `json:"description,omitempty"`
 	Provenance   Provenance `json:"provenance"`
 }
 

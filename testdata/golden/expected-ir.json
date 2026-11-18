@@ -91,6 +91,21 @@
             "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
             "confidence": "verified"
           }
+        },
+        {
+          "name": "employees",
+          "type": "array",
+          "fourDType": "collection",
+          "readOnly": true,
+          "exposed": true,
+          "nullable": true,
+          "targetDataClass": "Employee",
+          "relationType": "one-to-many",
+          "description": "Relation to Employee entities",
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
         }
       ],
       "queries": {
@@ -163,6 +178,21 @@
           "fourDType": "text",
           "exposed": true,
           "nullable": true,
+          "provenance": {
+            "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
+            "confidence": "verified"
+          }
+        },
+        {
+          "name": "company",
+          "type": "object",
+          "fourDType": "object",
+          "readOnly": true,
+          "exposed": true,
+          "nullable": true,
+          "targetDataClass": "Company",
+          "relationType": "many-to-one",
+          "description": "Relation to parent Company entity",
           "provenance": {
             "file": "/Users/miyako/Documents/GitHub/OpenAPI/testdata/fixtures/TestApp/Project/Database/catalog.4DCatalog",
             "confidence": "verified"
