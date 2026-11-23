@@ -94,7 +94,7 @@ Commands:
   dependencies   Manage and verify project component dependencies (list | verify | lock)
   validate       Validate an OpenAPI 3.1 specification file
   diff           Compare two specifications and detect breaking changes
-  export         Export client models (typescript | dart | swift)
+  export         Export client models and collections (typescript | dart | swift | csharp | kotlin | postman)
   init           Initialize openapi.yaml project configuration template
   mock           Run an embedded mock REST server matching the specification
   version        Print version information
@@ -667,8 +667,10 @@ func runExport(args []string) {
 
 	projectPath := fs.String("project", ".", "Path to 4D project")
 	specFile := fs.String("file", "", "Path to existing OpenAPI specification file")
-	target := fs.String("target", "typescript", "Export target (typescript)")
+	target := fs.String("target", "typescript", "Export target (typescript, dart, swift, csharp, kotlin, postman)")
 	outputPath := fs.String("output", "", "Output file path (default: stdout)")
+	namespace := fs.String("namespace", "", "Namespace or package name for generated models (C#, Kotlin)")
+	baseURL := fs.String("base-url", "", "Base URL for Postman collection (default: http://127.0.0.1:8044)")
 
 	if err := fs.Parse(args); err != nil {
 		os.Exit(ExitInvalidArgs)
@@ -697,28 +699,47 @@ func runExport(args []string) {
 		}
 	}
 
-	var code string
+	var data []byte
 	switch strings.ToLower(*target) {
 	case "typescript", "ts":
-		code = codegen.GenerateTypeScript(spec)
+		data = []byte(codegen.GenerateTypeScript(spec))
 	case "dart", "flutter":
-		code = codegen.GenerateDart(spec)
+		data = []byte(codegen.GenerateDart(spec))
 	case "swift", "ios":
-		code = codegen.GenerateSwift(spec)
+		data = []byte(codegen.GenerateSwift(spec))
+	case "csharp", "cs", "dotnet":
+		ns := *namespace
+		if ns == "" {
+			ns = "FourD.OpenAPI.Models"
+		}
+		data = []byte(codegen.GenerateCSharp(spec, ns))
+	case "kotlin", "kt", "android":
+		pkg := *namespace
+		if pkg == "" {
+			pkg = "fourd.openapi.models"
+		}
+		data = []byte(codegen.GenerateKotlin(spec, pkg))
+	case "postman", "postman-collection":
+		var err error
+		data, err = codegen.GeneratePostmanCollection(spec, *baseURL)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to generate Postman collection: %v\n", err)
+			os.Exit(ExitGeneralError)
+		}
 	default:
-		fmt.Fprintf(os.Stderr, "Unsupported export target: %s (supported: typescript, dart, swift)\n", *target)
+		fmt.Fprintf(os.Stderr, "Unsupported export target: %s (supported: typescript, dart, swift, csharp, kotlin, postman)\n", *target)
 		os.Exit(ExitInvalidArgs)
 	}
 
 	if *outputPath != "" {
 		_ = os.MkdirAll(filepath.Dir(*outputPath), 0755)
-		if err := os.WriteFile(*outputPath, []byte(code), 0644); err != nil {
+		if err := os.WriteFile(*outputPath, data, 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to write export file: %v\n", err)
 			os.Exit(ExitGeneralError)
 		}
-		fmt.Fprintf(os.Stderr, "[4d-openapi export] Generated %s models at %s\n", *target, *outputPath)
+		fmt.Fprintf(os.Stderr, "[4d-openapi export] Generated %s output at %s\n", *target, *outputPath)
 	} else {
-		fmt.Print(code)
+		os.Stdout.Write(data)
 	}
 
 	os.Exit(ExitSuccess)

@@ -92,7 +92,7 @@ Compares two OpenAPI specifications and detects breaking and non-breaking change
 ```
 
 ### `export`
-Exports client definitions (TypeScript, Dart/Flutter, or Swift).
+Exports client models or API collections (TypeScript, Dart/Flutter, Swift, C#, Kotlin, or Postman).
 
 ```bash
 # Export TypeScript interfaces
@@ -103,6 +103,15 @@ Exports client definitions (TypeScript, Dart/Flutter, or Swift).
 
 # Export Swift Codable structs
 4d-openapi export --project ./MyApp.4DProject --target swift --output ./dist/Models.swift
+
+# Export C# (.NET) records with System.Text.Json attributes
+4d-openapi export --project ./MyApp.4DProject --target csharp --namespace "MyApp.Models" --output ./dist/Models.cs
+
+# Export Kotlin data classes with kotlinx.serialization
+4d-openapi export --project ./MyApp.4DProject --target kotlin --namespace "com.example.app.models" --output ./dist/Models.kt
+
+# Export Postman Collection v2.1.0 JSON
+4d-openapi export --project ./MyApp.4DProject --target postman --base-url "http://127.0.0.1:8044" --output ./dist/postman_collection.json
 ```
 
 ### `mock`

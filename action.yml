@@ -1,0 +1,91 @@
+name: '4D OpenAPI Specification Generator'
+description: 'Automated OpenAPI 3.1 generator, validator, and model exporter for 4D projects'
+author: 'miyako'
+branding:
+  icon: 'file-text'
+  color: 'blue'
+
+inputs:
+  command:
+    description: '4d-openapi command to run (generate, validate, diff, export)'
+    required: false
+    default: 'generate'
+  project:
+    description: 'Path to 4D project folder or .4DProject file'
+    required: false
+    default: '.'
+  output:
+    description: 'Output file path (e.g., openapi.yaml, openapi.json, or dist/api.d.ts)'
+    required: false
+    default: 'openapi.yaml'
+  format:
+    description: 'Output format (yaml or json)'
+    required: false
+    default: 'yaml'
+  config:
+    description: 'Path to openapi.yaml configuration file'
+    required: false
+    default: ''
+  strict:
+    description: 'Fail if any unverified or incomplete element is found'
+    required: false
+    default: 'false'
+  offline:
+    description: 'Strictly offline mode'
+    required: false
+    default: 'false'
+  args:
+    description: 'Additional raw arguments passed to 4d-openapi'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '>=1.23'
+        check-latest: true
+
+    - name: Install 4d-openapi
+      shell: bash
+      run: |
+        if [ -f "${{ github.action_path }}/cmd/4d-openapi/main.go" ]; then
+          cd "${{ github.action_path }}" && go install ./cmd/4d-openapi
+        else
+          go install github.com/miyako/OpenAPI/cmd/4d-openapi@latest
+        fi
+
+    - name: Run 4d-openapi
+      shell: bash
+      run: |
+        CMD="${{ inputs.command }}"
+        PROJ="${{ inputs.project }}"
+        OUT="${{ inputs.output }}"
+        FMT="${{ inputs.format }}"
+        STRICT="${{ inputs.strict }}"
+        OFFLINE="${{ inputs.offline }}"
+        CFG="${{ inputs.config }}"
+        EXTRA="${{ inputs.args }}"
+
+        RUN_ARGS=()
+        if [ "$CMD" = "generate" ]; then
+          RUN_ARGS+=("generate" "--project" "$PROJ" "--output" "$OUT" "--format" "$FMT")
+          if [ "$STRICT" = "true" ]; then RUN_ARGS+=("--strict"); fi
+          if [ "$OFFLINE" = "true" ]; then RUN_ARGS+=("--offline"); fi
+          if [ -n "$CFG" ]; then RUN_ARGS+=("--config" "$CFG"); fi
+        elif [ "$CMD" = "validate" ]; then
+          RUN_ARGS+=("validate" "$OUT")
+          if [ "$STRICT" = "true" ]; then RUN_ARGS+=("--strict"); fi
+        elif [ "$CMD" = "export" ]; then
+          RUN_ARGS+=("export" "--project" "$PROJ" "--output" "$OUT")
+        else
+          RUN_ARGS+=("$CMD")
+        fi
+
+        if [ -n "$EXTRA" ]; then
+          4d-openapi "${RUN_ARGS[@]}" $EXTRA
+        else
+          4d-openapi "${RUN_ARGS[@]}"
+        fi
