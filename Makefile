@@ -1,4 +1,4 @@
-.PHONY: all build test test-golden clean run inspect serve validate
+.PHONY: all build test test-golden clean run inspect serve validate mock export-ts export-dart export-swift
 
 BINARY_NAME=4d-openapi
 
@@ -22,8 +22,20 @@ inspect: build
 serve: build
 	./$(BINARY_NAME) serve --project testdata/fixtures/TestApp --listen 127.0.0.1:8088
 
+mock: build
+	./$(BINARY_NAME) mock --project testdata/fixtures/TestApp --listen 127.0.0.1:8088
+
 validate: build
 	./$(BINARY_NAME) validate --file testdata/fixtures/TestApp/openapi.yaml
+
+export-ts: build
+	./$(BINARY_NAME) export --project testdata/fixtures/TestApp --target typescript
+
+export-dart: build
+	./$(BINARY_NAME) export --project testdata/fixtures/TestApp --target dart
+
+export-swift: build
+	./$(BINARY_NAME) export --project testdata/fixtures/TestApp --target swift
 
 clean:
 	rm -f $(BINARY_NAME) $(BINARY_NAME).exe

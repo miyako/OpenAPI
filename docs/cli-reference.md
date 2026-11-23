@@ -92,10 +92,24 @@ Compares two OpenAPI specifications and detects breaking and non-breaking change
 ```
 
 ### `export`
-Exports client definitions (e.g., TypeScript interfaces).
+Exports client definitions (TypeScript, Dart/Flutter, or Swift).
 
 ```bash
+# Export TypeScript interfaces
 4d-openapi export --project ./MyApp.4DProject --target typescript --output ./dist/api.d.ts
+
+# Export Dart / Flutter models
+4d-openapi export --project ./MyApp.4DProject --target dart --output ./dist/models.dart
+
+# Export Swift Codable structs
+4d-openapi export --project ./MyApp.4DProject --target swift --output ./dist/Models.swift
+```
+
+### `mock`
+Runs an embedded mock REST server matching the specification.
+
+```bash
+4d-openapi mock --project ./MyApp.4DProject --listen 127.0.0.1:8088
 ```
 
 ### `init`

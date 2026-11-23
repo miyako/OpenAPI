@@ -18,6 +18,7 @@ import (
 	"github.com/miyako/OpenAPI/internal/diff"
 	"github.com/miyako/OpenAPI/internal/extractor"
 	"github.com/miyako/OpenAPI/internal/mapping"
+	"github.com/miyako/OpenAPI/internal/mock"
 	"github.com/miyako/OpenAPI/internal/openapi"
 	"github.com/miyako/OpenAPI/internal/project"
 	"github.com/miyako/OpenAPI/internal/server"
@@ -62,6 +63,8 @@ func main() {
 		runExport(args)
 	case "init":
 		runInit(args)
+	case "mock":
+		runMock(args)
 	case "help", "-h", "--help":
 		printUsage()
 		os.Exit(ExitSuccess)
@@ -88,8 +91,9 @@ Commands:
   dependencies   Manage and verify project component dependencies (list | verify | lock)
   validate       Validate an OpenAPI 3.1 specification file
   diff           Compare two specifications and detect breaking changes
-  export         Export client definitions (e.g. TypeScript interfaces)
+  export         Export client models (typescript | dart | swift)
   init           Initialize openapi.yaml project configuration template
+  mock           Run an embedded mock REST server matching the specification
   version        Print version information
 
 Run '4d-openapi <command> --help' for details on a specific command.
@@ -690,25 +694,77 @@ func runExport(args []string) {
 		}
 	}
 
-	if strings.ToLower(*target) != "typescript" && strings.ToLower(*target) != "ts" {
-		fmt.Fprintf(os.Stderr, "Unsupported export target: %s (supported: typescript)\n", *target)
+	var code string
+	switch strings.ToLower(*target) {
+	case "typescript", "ts":
+		code = codegen.GenerateTypeScript(spec)
+	case "dart", "flutter":
+		code = codegen.GenerateDart(spec)
+	case "swift", "ios":
+		code = codegen.GenerateSwift(spec)
+	default:
+		fmt.Fprintf(os.Stderr, "Unsupported export target: %s (supported: typescript, dart, swift)\n", *target)
 		os.Exit(ExitInvalidArgs)
 	}
 
-	tsCode := codegen.GenerateTypeScript(spec)
-
 	if *outputPath != "" {
 		_ = os.MkdirAll(filepath.Dir(*outputPath), 0755)
-		if err := os.WriteFile(*outputPath, []byte(tsCode), 0644); err != nil {
+		if err := os.WriteFile(*outputPath, []byte(code), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to write export file: %v\n", err)
 			os.Exit(ExitGeneralError)
 		}
-		fmt.Fprintf(os.Stderr, "[4d-openapi export] Generated TypeScript definitions at %s\n", *outputPath)
+		fmt.Fprintf(os.Stderr, "[4d-openapi export] Generated %s models at %s\n", *target, *outputPath)
 	} else {
-		fmt.Print(tsCode)
+		fmt.Print(code)
 	}
 
 	os.Exit(ExitSuccess)
+}
+
+func runMock(args []string) {
+	fs := flag.NewFlagSet("mock", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+
+	specFile := fs.String("file", "", "Path to OpenAPI spec file (yaml or json)")
+	projectPath := fs.String("project", "", "Path to 4D project folder (generates in-memory if --file not passed)")
+	listenAddr := fs.String("listen", "127.0.0.1:8088", "Listen host and port")
+
+	if err := fs.Parse(args); err != nil {
+		os.Exit(ExitInvalidArgs)
+	}
+
+	var spec *openapi.OpenAPISpec
+	if *specFile != "" {
+		var err error
+		spec, err = loadSpecFromFile(*specFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to load spec: %v\n", err)
+			os.Exit(ExitInvalidArgs)
+		}
+	} else {
+		proj := *projectPath
+		if proj == "" {
+			proj = "."
+		}
+		col := diagnostics.NewCollector()
+		cfg, _ := config.LoadConfig(config.FindConfigFile(proj))
+		inputIR, err := extractor.Extract(extractor.Options{ProjectPath: proj, Config: cfg}, col)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to inspect project: %v\n", err)
+			os.Exit(ExitExtractionError)
+		}
+		spec, err = mapping.MapIRToOpenAPI(inputIR, cfg, col)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to compile spec: %v\n", err)
+			os.Exit(ExitExtractionError)
+		}
+	}
+
+	mockSrv := mock.NewServer(*listenAddr, spec)
+	if err := mockSrv.Start(); err != nil {
+		fmt.Fprintf(os.Stderr, "Mock server error: %v\n", err)
+		os.Exit(ExitGeneralError)
+	}
 }
 
 func loadSpecFromFile(filePath string) (*openapi.OpenAPISpec, error) {

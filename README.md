@@ -73,8 +73,9 @@ Open [http://127.0.0.1:8088/docs](http://127.0.0.1:8088/docs) in your browser to
 | `dependencies` | Manage and lock component dependencies (`list`, `verify`, `lock`) |
 | `validate` | Validate an OpenAPI 3.1 specification file |
 | `diff` | Compare two OpenAPI specifications and detect breaking changes |
-| `export` | Export TypeScript interfaces (`--target typescript`) |
+| `export` | Export client models (`--target typescript \| dart \| swift`) |
 | `init` | Initialize starter `openapi.yaml` and `openapi-overlay.yaml` |
+| `mock` | Run embedded mock 4D REST server matching the specification |
 
 For detailed flags and exit codes, see [CLI Reference](file:///Users/miyako/Documents/GitHub/OpenAPI/docs/cli-reference.md).
 
