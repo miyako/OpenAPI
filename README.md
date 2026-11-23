@@ -67,11 +67,14 @@ Open [http://127.0.0.1:8088/docs](http://127.0.0.1:8088/docs) in your browser to
 
 | Command | Description |
 | :--- | :--- |
-| `generate` | Extract 4D metadata and generate OpenAPI 3.1 YAML/JSON |
+| `generate` | Extract 4D metadata and generate OpenAPI 3.1 YAML/JSON (with `--watch`) |
 | `serve` | Run embedded HTTP server with interactive Scalar UI docs |
 | `inspect` | Summarize DataClasses, functions, handlers, and diagnostics |
 | `dependencies` | Manage and lock component dependencies (`list`, `verify`, `lock`) |
 | `validate` | Validate an OpenAPI 3.1 specification file |
+| `diff` | Compare two OpenAPI specifications and detect breaking changes |
+| `export` | Export TypeScript interfaces (`--target typescript`) |
+| `init` | Initialize starter `openapi.yaml` and `openapi-overlay.yaml` |
 
 For detailed flags and exit codes, see [CLI Reference](file:///Users/miyako/Documents/GitHub/OpenAPI/docs/cli-reference.md).
 

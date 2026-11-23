@@ -83,3 +83,24 @@ Validates an OpenAPI 3.1 specification file.
 ```bash
 4d-openapi validate --file ./dist/openapi.yaml
 ```
+
+### `diff`
+Compares two OpenAPI specifications and detects breaking and non-breaking changes.
+
+```bash
+4d-openapi diff --old ./v1/openapi.json --new ./v2/openapi.json [--strict]
+```
+
+### `export`
+Exports client definitions (e.g., TypeScript interfaces).
+
+```bash
+4d-openapi export --project ./MyApp.4DProject --target typescript --output ./dist/api.d.ts
+```
+
+### `init`
+Initializes a new `openapi.yaml` configuration and `openapi-overlay.yaml` template.
+
+```bash
+4d-openapi init [--project ./MyApp.4DProject]
+```

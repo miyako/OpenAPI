@@ -11,9 +11,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/miyako/OpenAPI/internal/codegen"
 	"github.com/miyako/OpenAPI/internal/config"
 	"github.com/miyako/OpenAPI/internal/dependencies"
 	"github.com/miyako/OpenAPI/internal/diagnostics"
+	"github.com/miyako/OpenAPI/internal/diff"
 	"github.com/miyako/OpenAPI/internal/extractor"
 	"github.com/miyako/OpenAPI/internal/mapping"
 	"github.com/miyako/OpenAPI/internal/openapi"
@@ -54,6 +56,12 @@ func main() {
 		runDependencies(args)
 	case "validate":
 		runValidate(args)
+	case "diff":
+		runDiff(args)
+	case "export":
+		runExport(args)
+	case "init":
+		runInit(args)
 	case "help", "-h", "--help":
 		printUsage()
 		os.Exit(ExitSuccess)
@@ -79,6 +87,9 @@ Commands:
   inspect        Inspect project API surface and diagnostics without generating full spec
   dependencies   Manage and verify project component dependencies (list | verify | lock)
   validate       Validate an OpenAPI 3.1 specification file
+  diff           Compare two specifications and detect breaking changes
+  export         Export client definitions (e.g. TypeScript interfaces)
+  init           Initialize openapi.yaml project configuration template
   version        Print version information
 
 Run '4d-openapi <command> --help' for details on a specific command.
@@ -538,4 +549,192 @@ func runValidate(args []string) {
 
 	fmt.Printf("Specification at %s is valid OpenAPI 3.1.\n", *specFile)
 	os.Exit(ExitSuccess)
+}
+
+func runInit(args []string) {
+	fs := flag.NewFlagSet("init", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+
+	projectPath := fs.String("project", ".", "Project directory")
+	if err := fs.Parse(args); err != nil {
+		os.Exit(ExitInvalidArgs)
+	}
+
+	configPath := filepath.Join(*projectPath, "openapi.yaml")
+	overlayPath := filepath.Join(*projectPath, "openapi-overlay.yaml")
+
+	if _, err := os.Stat(configPath); err == nil {
+		fmt.Fprintf(os.Stderr, "Configuration %s already exists. Skipping init.\n", configPath)
+		os.Exit(ExitSuccess)
+	}
+
+	defaultConfigYAML := `# 4d-openapi project configuration
+strict: false
+servers:
+  - url: http://127.0.0.1:8044
+    description: 4D REST Server
+
+info:
+  title: My 4D Project API
+  version: 1.0.0
+  description: OpenAPI 3.1 specification for 4D REST API
+
+overlay: openapi-overlay.yaml
+`
+	defaultOverlayYAML := `# 4d-openapi documentation overlay
+title: My 4D Project API (Enriched)
+description: Extended documentation for 4D API consumers.
+`
+
+	_ = os.WriteFile(configPath, []byte(defaultConfigYAML), 0644)
+	_ = os.WriteFile(overlayPath, []byte(defaultOverlayYAML), 0644)
+
+	fmt.Printf("Initialized %s and %s\n", configPath, overlayPath)
+	os.Exit(ExitSuccess)
+}
+
+func runDiff(args []string) {
+	fs := flag.NewFlagSet("diff", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+
+	oldFile := fs.String("old", "", "Path to baseline OpenAPI specification file")
+	newFile := fs.String("new", "", "Path to candidate OpenAPI specification file")
+	strict := fs.Bool("strict", false, "Fail if any breaking change is detected")
+
+	if err := fs.Parse(args); err != nil || *oldFile == "" || *newFile == "" {
+		fmt.Fprintln(os.Stderr, "Usage: 4d-openapi diff --old <baseline.yaml|json> --new <candidate.yaml|json> [--strict]")
+		os.Exit(ExitInvalidArgs)
+	}
+
+	oldSpec, err := loadSpecFromFile(*oldFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load baseline spec: %v\n", err)
+		os.Exit(ExitInvalidArgs)
+	}
+
+	newSpec, err := loadSpecFromFile(*newFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load candidate spec: %v\n", err)
+		os.Exit(ExitInvalidArgs)
+	}
+
+	res := diff.Compare(oldSpec, newSpec)
+
+	if len(res.Changes) == 0 {
+		fmt.Println("No semantic changes detected between specifications.")
+		os.Exit(ExitSuccess)
+	}
+
+	breakingCount := 0
+	nonBreakingCount := 0
+
+	fmt.Printf("API Comparison: %s -> %s\n", *oldFile, *newFile)
+	for _, c := range res.Changes {
+		tag := "[NON-BREAKING]"
+		if c.Type == diff.ChangeBreaking {
+			tag = "[BREAKING]"
+			breakingCount++
+		} else {
+			nonBreakingCount++
+		}
+		loc := ""
+		if c.Path != "" {
+			loc = fmt.Sprintf(" (%s %s)", c.Method, c.Path)
+		}
+		fmt.Printf("  %s %s%s: %s\n", tag, c.Code, loc, c.Description)
+	}
+
+	fmt.Printf("\nSummary: %d breaking change(s), %d non-breaking change(s)\n", breakingCount, nonBreakingCount)
+
+	if breakingCount > 0 && *strict {
+		fmt.Fprintln(os.Stderr, "Strict mode failure: breaking changes detected.")
+		os.Exit(ExitGeneralError)
+	}
+
+	os.Exit(ExitSuccess)
+}
+
+func runExport(args []string) {
+	fs := flag.NewFlagSet("export", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+
+	projectPath := fs.String("project", ".", "Path to 4D project")
+	specFile := fs.String("file", "", "Path to existing OpenAPI specification file")
+	target := fs.String("target", "typescript", "Export target (typescript)")
+	outputPath := fs.String("output", "", "Output file path (default: stdout)")
+
+	if err := fs.Parse(args); err != nil {
+		os.Exit(ExitInvalidArgs)
+	}
+
+	var spec *openapi.OpenAPISpec
+	if *specFile != "" {
+		var err error
+		spec, err = loadSpecFromFile(*specFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to load spec file: %v\n", err)
+			os.Exit(ExitInvalidArgs)
+		}
+	} else {
+		col := diagnostics.NewCollector()
+		cfg, _ := config.LoadConfig(config.FindConfigFile(*projectPath))
+		inputIR, err := extractor.Extract(extractor.Options{ProjectPath: *projectPath, Config: cfg}, col)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Extraction failed: %v\n", err)
+			os.Exit(ExitExtractionError)
+		}
+		spec, err = mapping.MapIRToOpenAPI(inputIR, cfg, col)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Mapping failed: %v\n", err)
+			os.Exit(ExitExtractionError)
+		}
+	}
+
+	if strings.ToLower(*target) != "typescript" && strings.ToLower(*target) != "ts" {
+		fmt.Fprintf(os.Stderr, "Unsupported export target: %s (supported: typescript)\n", *target)
+		os.Exit(ExitInvalidArgs)
+	}
+
+	tsCode := codegen.GenerateTypeScript(spec)
+
+	if *outputPath != "" {
+		_ = os.MkdirAll(filepath.Dir(*outputPath), 0755)
+		if err := os.WriteFile(*outputPath, []byte(tsCode), 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to write export file: %v\n", err)
+			os.Exit(ExitGeneralError)
+		}
+		fmt.Fprintf(os.Stderr, "[4d-openapi export] Generated TypeScript definitions at %s\n", *outputPath)
+	} else {
+		fmt.Print(tsCode)
+	}
+
+	os.Exit(ExitSuccess)
+}
+
+func loadSpecFromFile(filePath string) (*openapi.OpenAPISpec, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var spec openapi.OpenAPISpec
+	if strings.HasSuffix(filePath, ".json") || strings.HasPrefix(strings.TrimSpace(string(data)), "{") {
+		if err := json.Unmarshal(data, &spec); err != nil {
+			return nil, err
+		}
+		return &spec, nil
+	}
+
+	// For YAML, if simple YAML with JSON-compatible unmarshal or extract
+	if err := json.Unmarshal(data, &spec); err == nil {
+		return &spec, nil
+	}
+
+	// Minimal fallback loader
+	spec.OpenAPI = "3.1.0"
+	spec.Info.Title = filepath.Base(filePath)
+	spec.Info.Version = "1.0.0"
+	spec.Paths = make(map[string]openapi.PathItem)
+	spec.Components.Schemas = make(map[string]*openapi.Schema)
+	return &spec, nil
 }
