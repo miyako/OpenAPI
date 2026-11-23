@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/miyako/OpenAPI/internal/codegen"
+	"github.com/miyako/OpenAPI/internal/completion"
 	"github.com/miyako/OpenAPI/internal/config"
 	"github.com/miyako/OpenAPI/internal/dependencies"
 	"github.com/miyako/OpenAPI/internal/diagnostics"
@@ -65,6 +66,8 @@ func main() {
 		runInit(args)
 	case "mock":
 		runMock(args)
+	case "completion":
+		runCompletion(args)
 	case "help", "-h", "--help":
 		printUsage()
 		os.Exit(ExitSuccess)
@@ -793,4 +796,25 @@ func loadSpecFromFile(filePath string) (*openapi.OpenAPISpec, error) {
 	spec.Paths = make(map[string]openapi.PathItem)
 	spec.Components.Schemas = make(map[string]*openapi.Schema)
 	return &spec, nil
+}
+
+func runCompletion(args []string) {
+	if len(args) == 0 {
+		fmt.Fprintln(os.Stderr, "Usage: 4d-openapi completion <bash|zsh|fish>")
+		os.Exit(ExitInvalidArgs)
+	}
+
+	shell := strings.ToLower(args[0])
+	switch shell {
+	case "bash":
+		fmt.Print(completion.GenerateBash())
+	case "zsh":
+		fmt.Print(completion.GenerateZsh())
+	case "fish":
+		fmt.Print(completion.GenerateFish())
+	default:
+		fmt.Fprintf(os.Stderr, "Unsupported shell '%s'. Supported shells: bash, zsh, fish\n", shell)
+		os.Exit(ExitInvalidArgs)
+	}
+	os.Exit(ExitSuccess)
 }
