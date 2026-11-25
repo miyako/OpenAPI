@@ -1,0 +1,14 @@
+[
+  {
+    "verbs": ["GET"],
+    "pattern": "/api/v1/health",
+    "class": "HealthCheck",
+    "method": "ping"
+  },
+  {
+    "verbs": ["POST"],
+    "pattern": "/api/v1/webhook",
+    "class": "WebhookService",
+    "method": "receive"
+  }
+]

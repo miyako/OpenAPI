@@ -1,0 +1,4 @@
+overlay: 1.0.0
+info:
+  title: "Demo 4D Enterprise API (Overlaid)"
+  description: "Demonstration 4D ORDA REST API with customized descriptions via OpenAPI Overlay."

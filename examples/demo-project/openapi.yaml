@@ -1,0 +1,12 @@
+title: "Demo 4D Enterprise API"
+version: "1.0.0"
+description: "Demonstration 4D ORDA REST and custom handler API specification."
+strict: true
+
+servers:
+  - url: "http://127.0.0.1:8044"
+    description: "Local 4D REST Server"
+  - url: "https://api.example.com"
+    description: "Production Gateway"
+
+overlay: "openapi-overlay.yaml"

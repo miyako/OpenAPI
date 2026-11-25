@@ -2,6 +2,7 @@
 
 Native, cross-platform OpenAPI 3.1 specification generator and interactive documentation server for 4D projects.
 
+[![CI](https://github.com/miyako/OpenAPI/actions/workflows/ci.yml/badge.svg)](https://github.com/miyako/OpenAPI/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/miyako/OpenAPI)](https://goreportcard.com/report/github.com/miyako/OpenAPI)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -29,7 +30,7 @@ Native, cross-platform OpenAPI 3.1 specification generator and interactive docum
 
 ## Installation & Build
 
-Build from source with Go 1.22+:
+Build from source with Go 1.23+:
 
 ```bash
 git clone https://github.com/miyako/OpenAPI.git
@@ -61,6 +62,51 @@ go build -o 4d-openapi ./cmd/4d-openapi
 ```
 Open [http://127.0.0.1:8088/docs](http://127.0.0.1:8088/docs) in your browser to view the interactive Scalar UI.
 
+### 4. Export Client Models & Postman Collection
+```bash
+# TypeScript interfaces
+./4d-openapi export --project ./MyApp.4DProject --target typescript --output ./dist/api.d.ts
+
+# Swift Codable structs
+./4d-openapi export --project ./MyApp.4DProject --target swift --output ./dist/Models.swift
+
+# Kotlin data classes (kotlinx.serialization)
+./4d-openapi export --project ./MyApp.4DProject --target kotlin --namespace "com.example.app" --output ./dist/Models.kt
+
+# C# (.NET) records (System.Text.Json)
+./4d-openapi export --project ./MyApp.4DProject --target csharp --namespace "MyApp.Models" --output ./dist/Models.cs
+
+# Dart / Flutter models
+./4d-openapi export --project ./MyApp.4DProject --target dart --output ./dist/models.dart
+
+# Postman Collection v2.1.0 JSON
+./4d-openapi export --project ./MyApp.4DProject --target postman --output ./dist/collection.json
+```
+
+---
+
+## Reusable GitHub Action
+
+Use `miyako/OpenAPI` in your 4D repository's GitHub Actions workflow to automatically generate, validate, or export specs in CI:
+
+```yaml
+name: Generate OpenAPI
+on: [push, pull_request]
+
+jobs:
+  openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate OpenAPI 3.1 Spec
+        uses: miyako/OpenAPI@v1
+        with:
+          command: generate
+          project: ./Project
+          output: openapi.yaml
+          strict: true
+```
+
 ---
 
 ## Command Reference
@@ -73,7 +119,7 @@ Open [http://127.0.0.1:8088/docs](http://127.0.0.1:8088/docs) in your browser to
 | `dependencies` | Manage and lock component dependencies (`list`, `verify`, `lock`) |
 | `validate` | Validate an OpenAPI 3.1 specification file |
 | `diff` | Compare two OpenAPI specifications and detect breaking changes |
-| `export` | Export client models (`--target typescript \| dart \| swift`) |
+| `export` | Export client models (`typescript`, `swift`, `kotlin`, `csharp`, `dart`, `postman`) |
 | `init` | Initialize starter `openapi.yaml` and `openapi-overlay.yaml` |
 | `mock` | Run embedded mock 4D REST server matching the specification |
 
@@ -81,8 +127,9 @@ For detailed flags and exit codes, see [CLI Reference](file:///Users/miyako/Docu
 
 ---
 
-## Architecture & Mapping
+## Examples & Guides
 
+- [Complete Demo Project](file:///Users/miyako/Documents/GitHub/OpenAPI/examples/README.md)
 - [Architecture Overview](file:///Users/miyako/Documents/GitHub/OpenAPI/docs/architecture.md)
 - [4D-to-OpenAPI Mapping Specification](file:///Users/miyako/Documents/GitHub/OpenAPI/docs/mapping-specification.md)
 - [4D Integration Guide](file:///Users/miyako/Documents/GitHub/OpenAPI/4d-integration/README.md)

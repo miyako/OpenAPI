@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database version="2.0">
+  <table name="Company" id="1" uuid="comp-uuid-001" exposed="true">
+    <field name="ID" id="1" type="4" autosequence="true" primary_key="true"/>
+    <field name="name" id="2" type="2" exposed="true"/>
+    <field name="revenue" id="3" type="8" exposed="true"/>
+    <field name="logo" id="4" type="10" exposed="true"/>
+  </table>
+  <table name="Employee" id="2" uuid="emp-uuid-002" exposed="true">
+    <field name="ID" id="1" type="4" autosequence="true" primary_key="true"/>
+    <field name="companyID" id="2" type="4" exposed="true"/>
+    <field name="firstName" id="3" type="2" exposed="true"/>
+    <field name="lastName" id="4" type="2" exposed="true"/>
+    <field name="email" id="5" type="2" exposed="true"/>
+    <field name="active" id="6" type="6" exposed="true"/>
+  </table>
+  <relation name="Company_Employees" from_table="Company" from_field="ID" to_table="Employee" to_field="companyID" type="one-to-many"/>
+  <relation name="Employee_Company" from_table="Employee" from_field="companyID" to_table="Company" to_field="ID" type="many-to-one"/>
+</database>
