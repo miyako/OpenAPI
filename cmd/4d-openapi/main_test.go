@@ -69,17 +69,21 @@ func TestGoldenDeterminism(t *testing.T) {
 		t.Errorf("Determinism failure: JSON outputs between two runs are not byte-identical")
 	}
 
-	// Verify against golden files
+	// Verify against golden files (normalizing CRLF for cross-platform deterministic checks)
 	expectedYAML, err := os.ReadFile(filepath.Join(goldenDir, "expected-openapi.yaml"))
 	if err == nil {
-		if !bytes.Equal(yaml1, expectedYAML) {
+		cleanExpected := bytes.ReplaceAll(expectedYAML, []byte("\r\n"), []byte("\n"))
+		cleanYAML1 := bytes.ReplaceAll(yaml1, []byte("\r\n"), []byte("\n"))
+		if !bytes.Equal(cleanYAML1, cleanExpected) {
 			t.Errorf("Generated YAML does not match expected-openapi.yaml golden file")
 		}
 	}
 
 	expectedJSON, err := os.ReadFile(filepath.Join(goldenDir, "expected-openapi.json"))
 	if err == nil {
-		if !bytes.Equal(json1, expectedJSON) {
+		cleanExpected := bytes.ReplaceAll(expectedJSON, []byte("\r\n"), []byte("\n"))
+		cleanJSON1 := bytes.ReplaceAll(json1, []byte("\r\n"), []byte("\n"))
+		if !bytes.Equal(cleanJSON1, cleanExpected) {
 			t.Errorf("Generated JSON does not match expected-openapi.json golden file")
 		}
 	}
